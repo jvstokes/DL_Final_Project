@@ -54,29 +54,29 @@ The other baseline we used was passing a sentence through multiple NMTs. This in
 
 For this method we apply transfer learning using Spanish as a pivot language. We can summarize our process into the following steps:
 
-1. Train NMT from source $\rightarrow$ pivot corresponding to ca $\rightarrow$ es using our ca-es parallel corpus.
-2. Train NMT from pivot $\rightarrow$ target corresponding to es $\rightarrow$ it using our es-it parallel corpus.
-3. Copy the parameters from the source $\rightarrow$ pivot encoder and the parameters from the pivot $\rightarrow$ target decoder into a new model. Train one last time using the source $\rightarrow$ target parallel corpus (ca-it).
+1. Train NMT from source &#8594; pivot corresponding to ca &#8594; es using our ca-es parallel corpus.
+2. Train NMT from pivot &#8594; target corresponding to es &#8594; it using our es-it parallel corpus.
+3. Copy the parameters from the source &#8594; pivot encoder and the parameters from the pivot &#8594; target decoder into a new model. Train one last time using the source &#8594; target parallel corpus (ca-it).
 
 ### 4.3 Step-wise Transfer Learning
 
-One issue with the above pivot learning process is that our final model's encoder is trained to be connected to a ca $\to$ es decoder, while it's actually connected to a es $\to$ it decoder. Similarly, this es $\to$ it decoder was trained to expect its input to come from an es $\to$ it encoder. These discrepancies can produce a mismatch on how the intermediary vector stores meaning, and can lead to mal-formed translations.
+One issue with the above pivot learning process is that our final model's encoder is trained to be connected to a ca &#8594; es decoder, while it's actually connected to a es &#8594; it decoder. Similarly, this es &#8594; it decoder was trained to expect its input to come from an es &#8594; it encoder. These discrepancies can produce a mismatch on how the intermediary vector stores meaning, and can lead to mal-formed translations.
 
 In order to remedy this, we need a way for these separated encoder and decoders to become aware of each other under training. In order to do so, we will employ a sequential training process in which we carry over the parameters of the final encoder when training the final decoder rather than training both in isolation. 
 
 This approach is similar to the pivot-based method with a small change to how the pivot $\rightarrow$ target model is trained. Here are the steps used:
 
-1. Train NMT from source $\rightarrow$ pivot corresponding to ca $\rightarrow$ es using our ca-es parallel corpus.
-2. Copy the parameters from the source $\rightarrow$ pivot encoder, freeze the encoder, and train using our it-es parallel data.
-3. Unfreeze the encoder, and train using the source $\rightarrow$ target parallel corpus (ca-it). 
+1. Train NMT from source &#8594; pivot corresponding to ca &#8594; es using our ca-es parallel corpus.
+2. Copy the parameters from the source &#8594; pivot encoder, freeze the encoder, and train using our it-es parallel data.
+3. Unfreeze the encoder, and train using the source &#8594; target parallel corpus (ca-it). 
 
 ### 4.4 Employing Pretrained Models
 
 Since the shared task allows for the use of pretrained models, we explored using one similar to our second baseline. In this experiment, we used Facebooks mBart-large-50 many to many model for multilingual translation \cite{tang2020multilingual}. While this model does not support translation from Catalan to Italian, it does have Spanish to Italian. Therefore, we first pass our test data through our ca $\rightarrow$ es model and then through the mBart model set to translate between Spanish and Italian. We use this approach in order to leverage the benefits of large compute used for this pretrained model, as well as the efficiency of reducing the need to re-train models.
 
-One potential issue with this is that the use of this complete model necessitates that we affix it to our ca $\to$ es model which can result in a telephoning effect, as well as doubling the decoding time. Ideally we would be able to take only the decoder from this model, and leverage the strengths of this pretrained model if we can encode the information from the source language in the format appropriate for this decoder.
+One potential issue with this is that the use of this complete model necessitates that we affix it to our ca &#8594; es model which can result in a telephoning effect, as well as doubling the decoding time. Ideally we would be able to take only the decoder from this model, and leverage the strengths of this pretrained model if we can encode the information from the source language in the format appropriate for this decoder.
 
-This also opens up the question: What if we could make our ca $\to$ es encoder aware of the parameters of this pretrained model under training? This would limit the telephoning effect and decoding time while also leveraging the strengths of using a pretrained model. 
+This also opens up the question: What if we could make our ca &#8594; es encoder aware of the parameters of this pretrained model under training? This would limit the telephoning effect and decoding time while also leveraging the strengths of using a pretrained model. 
 
 ## 5 Implementation 
 
@@ -88,13 +88,13 @@ Ba, 2017) with a warm up of 8000 steps. We trained for a total of 25k steps for 
 
 The results of our systems on the ca-it test set are presented in Table 2.
 
-For the baselines, we see the direct source $\rightarrow$ target model surpass that of the telephoning approach, posting a +10.9\% increase in BLEU score.
+For the baselines, we see the direct source &#8594; target model surpass that of the telephoning approach, posting a +10.9\% increase in BLEU score.
 
-Similar to the telephoning method but using Facebook's mBart large 50 many to many NMT model instead of the standard NMT between Spanish $\rightarrow$ Italian, we see a similar performance in terms of both TER and BLEU. We saw that it slightly outperformed the baseline scoring by +1.5\% in BLEU. 
+Similar to the telephoning method but using Facebook's mBart large 50 many to many NMT model instead of the standard NMT between Spanish &#8594; Italian, we see a similar performance in terms of both TER and BLEU. We saw that it slightly outperformed the baseline scoring by +1.5\% in BLEU. 
 
-Looking at the transfer learning based approaches, we see the standard pivot-based approach performs the best out of the two with a BLEU score of 23.0, a +51.3\% increase over the step-wise approach and +8.7\% over the pretrained telephoning. However, it sees a slightly worse BLEU score when compared to the direct NMT baseline model, seeing a -1.7\% in BLEU.
+Looking at the transfer learning based approaches, we see the standard pivot-based approach performs the best out of the two with a BLEU score of 23.0, a +51.3\% increase over the step-wise approach and +8.7% over the pretrained telephoning. However, it sees a slightly worse BLEU score when compared to the direct NMT baseline model, seeing a -1.7% in BLEU.
 
-In conclusion, we see the Direct source $\rightarrow$ target NMT performed the best with the pivot-based approach showing similar results. We found the step-wise transfer method produced the lowest scores.\
+In conclusion, we see the Direct source &#8594; target NMT performed the best with the pivot-based approach showing similar results. We found the step-wise transfer method produced the lowest scores.\
 
 Table 2:
 
@@ -117,7 +117,7 @@ Here are a few insights we gained:
 
 The main issue we see when creating the pivot-based approach is that in the final model, the Catalan encoder is pretrained to output and be used by a Spanish decoder and similarly, the Italian decoder is pretrained to use outputs from a Spanish encoder. This mismatch is addressed in our step-wise model.
 
-By freezing the encoder during our Spanish $\rightarrow$ Italian training, we ensure the encoder is still modeling Catalan. However, in our results, these did not manifest themselves into an improvement in either BLEU or TER. Rather, we saw a worse performance using this technique. This is a rather unexpected result when compared to other reports using similar implementations (Kim et al., 2019). Likely, this is due to a fault in our code. It is rather involved to freeze an entire encoder using OpenNMT especially the attention layers. 
+By freezing the encoder during our Spanish &#8594; Italian training, we ensure the encoder is still modeling Catalan. However, in our results, these did not manifest themselves into an improvement in either BLEU or TER. Rather, we saw a worse performance using this technique. This is a rather unexpected result when compared to other reports using similar implementations (Kim et al., 2019). Likely, this is due to a fault in our code. It is rather involved to freeze an entire encoder using OpenNMT especially the attention layers. 
 
 ### 7.2 Telephoning leads to compound error
 
