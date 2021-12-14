@@ -2,12 +2,14 @@
 
 Our project focused on low resource language translation by implementing supervised systems which leverage transfer learning and pretrained models. Our models include both a baseline Seq2Seq model, as well as a pivot learning based model using Spanish (ES) as a pivot language. Our results found that the pivot based model performed similarly to the baseline approach, although this came at significant computational increases.
 
+Our code is a mix of self implementation and the use of both the SentencePiece  (Kudo and Richardson, 2018) aand OpenNMT toolkit (Klein et al., 2018).
+
 
 ## 1 Introduction
 
 The spark for this project was a [paper](https://arxiv.org/pdf/1909.09524.pdf) focused on the idea of transfer learning within neural language translation. We were interested in seeing how well this technique would perform in the low resource setting. Intuitively, we assumed that being able to leverge a large parallel corpus with a pivot language would allow for a more accurate model compared to using an extremely limited source to target corpus.
 
-Our project is focused on the translation of Catalan (ca)  Italian (it). For our baseline system, we employed an Encoder-Decoder architecture with an attention mechanism, similar to *Attention is all you need*  (Vaswani et al.,
+Our project is focused on the translation of Catalan (ca) to Italian (it). For our baseline system, we employed an Encoder-Decoder architecture with an attention mechanism, similar to *Attention is all you need*  (Vaswani et al.,
 2017). However, these models require significant amounts of training data, and limited data (such as is the case for this shared task) can negatively impact results that can be achieved with these models (Koehn and Knowles, 2017). In order to circumvent the limited amount of aligned training data between these language pairs, we leveraged a pivot learning based approach using Spanish (es) as our pivot language for our target. We chose to use Spanish as our pivot language for two main reasons. First, the Catalan language is primarily spoken within regions in Spain. Many of these regions (such as Barcelona, within Catalonia) recognize both Catalan and Spanish as official languages, and fluency in both is prominent among speakers in these regions. As a result of both being recognized as official languages, as well as the prominence of both in the same area, there is a large amount of parallel data for Catalan and Spanish. Another reason is that the historical proximity of these languages has led to significant amounts of borrowing between these languages. As a result, many aspects of the language such as syntactical elements will be preserved when translating into Spanish and therefore the model will not have to learn them. The prevalence of borrowing also opens up the opportunity to hard-code common aspects of these translations, in order to further decrease the overhead of what the model has to learn. 
 
 Because Spanish is one of the most commonly spoken languages in the world (and the most common Romance language), there are also large amounts of training data available from Spanish to our target language. This allows us to build a competent model to translate from our pivot language to our target, as well as opening up the feasibility of using pretrained models for this step of translation. 
@@ -24,7 +26,7 @@ Transfer learning has been a popular approach for the low resource setting and c
 
 ## 3 Data
 
-Since our techniques are focused on using a pivot language, we needed in total three pairs of parallel corpora. Using the provided list of allowed sources, we use WikiMatrix Schwenk et al., 2019) for ca-it, ParaCrawl (Morishita et al., 2020)  for ca-es, and MultiCCAligned (El-Kishky et al., 2020) for es-it. For our experiments, we focused on Catalan to Italian using Spanish as a pivot. Table 1 summarizes the datasets used before and after preprocessing.
+Since our techniques are focused on using a pivot language, we needed in total three pairs of parallel corpora. Using the provided list of allowed sources, we use WikiMatrix (Schwenk et al., 2019) for ca-it, ParaCrawl (Morishita et al., 2020)  for ca-es, and MultiCCAligned (El-Kishky et al., 2020) for es-it. For our experiments, we focused on Catalan to Italian using Spanish as a pivot. Table 1 summarizes the datasets used before and after preprocessing.
 
 Table 1:
 
@@ -48,7 +50,7 @@ In this section, we provide details on our particular experiments and implementa
 
 To properly compare the influence of our transfer learning approaches, we implemented a direct source to target model. This was a standard NMT model trained on the ca-it parallel corpus. This is the simplest approach and takes considerably less training time and resources when compared to the transfer learning methods.
 
-The other baseline we used was passing a sentence through multiple NMTs. This involved an NMT from source $\rightarrow$ pivot and another from pivot $\rightarrow$ target. The final translation would pass the test sentence through both models to get a final translation.
+The other baseline we used was passing a sentence through multiple NMTs. This involved an NMT from source &#8594; pivot and another from pivot &#8594; target. The final translation would pass the test sentence through both models to get a final translation.
 
 ### 4.2 Pivot-based Transfer Learning
 
@@ -72,7 +74,7 @@ This approach is similar to the pivot-based method with a small change to how th
 
 ### 4.4 Employing Pretrained Models
 
-Since the shared task allows for the use of pretrained models, we explored using one similar to our second baseline. In this experiment, we used Facebooks mBart-large-50 many to many model for multilingual translation tang2020multilingual. While this model does not support translation from Catalan to Italian, it does have Spanish to Italian. Therefore, we first pass our test data through our ca &#8594; es model and then through the mBart model set to translate between Spanish and Italian. We use this approach in order to leverage the benefits of large compute used for this pretrained model, as well as the efficiency of reducing the need to re-train models.
+We also explored using a similar approach to our second baseline. In this experiment, we used Facebooks mBart-large-50 many to many model for multilingual translation (Tang et al., 2020). While this model does not support translation from Catalan to Italian, it does have Spanish to Italian. Therefore, we first pass our test data through our ca &#8594; es model and then through the mBart model set to translate between Spanish and Italian. We use this approach in order to leverage the benefits of large compute used for this pretrained model, as well as the efficiency of reducing the need to re-train models.
 
 One potential issue with this is that the use of this complete model necessitates that we affix it to our ca &#8594; es model which can result in a telephoning effect, as well as doubling the decoding time. Ideally we would be able to take only the decoder from this model, and leverage the strengths of this pretrained model if we can encode the information from the source language in the format appropriate for this decoder.
 
@@ -147,6 +149,7 @@ Holger Schwenk, Vishrav Chaudhary, Shuo Sun, Hongyu Gong, and Francisco Guzmán.
 Rico Sennrich, Barry Haddow, and Alexandra Birch. 2016. Neural machine translation of rare words with subword units.
 
 Yuqing Tang, Chau Tran, Xian Li, Peng-Jen Chen, Naman Goyal, Vishrav Chaudhary, Jiatao Gu, and Angela Fan. 2020. Multilingual translation with extensible multilingual pretraining and finetuning. Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob
+
 Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, and Illia Polosukhin. 2017. Attention is all you need.
 
 Kocmi, Tom and Bojar, Ond. 2018. Trivial Transfer Learning for Low-Resource Neural Machine Translation. In Proceedings of the Third Conference on Machine Translation: Research Papers.
