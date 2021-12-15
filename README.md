@@ -4,6 +4,8 @@ Our project focused on low resource language translation by implementing supervi
 
 Our code is a mix of self implementation and the use of both the SentencePiece  (Kudo and Richardson, 2018) aand OpenNMT toolkit (Klein et al., 2018).
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/-fc9unUnPBM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 
 ## 1 Introduction
 
